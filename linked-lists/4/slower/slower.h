@@ -27,7 +27,7 @@
 #define LOWER_CARD LOWER_CARD__DEFAULT
 #endif
 
-_Static_assert(LOWER_CARD > 0 && LOWER_CARD < sizeof(LOWER_SET__FULL),
+_Static_assert((LOWER_CARD > 0) & (LOWER_CARD < sizeof(LOWER_SET__FULL)),
     "Illegal value of LOWER_CARD.");
 
 #define SLOWER_LENGTH__DEFAULT 4
@@ -46,6 +46,10 @@ _Static_assert(LOWER_CARD > 0 && LOWER_CARD < sizeof(LOWER_SET__FULL),
 
 #if SLOWER_COMPAR_LENGTH <= 0 || SLOWER_COMPAR_LENGTH > SLOWER_LENGTH
 #error Illegal value of SLOWER_COMPAR_LENGTH.
+#endif
+
+#ifndef nullptr
+#define nullptr ((void*)0)
 #endif
 
 #include <stdio.h>

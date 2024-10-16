@@ -92,3 +92,26 @@ int lslower_head_value(const lslower *s, slower *ptr) {
     
     return 0;  // Success
 }
+
+int lslower_move_head_head(lslower *src, lslower *dest) {
+    if (lslower_is_empty(src)) {
+        return 1;  // Source list is empty
+    }
+
+    // Create a new node and copy the head value from src
+    clslower *new_node = malloc(sizeof(*new_node));
+    if (new_node == NULL) {
+        return 1;  // Memory allocation failed
+    }
+
+    new_node->value = src->head->value;  // Copy the head value
+    new_node->next = dest->head;         // Point to the current head of dest
+    dest->head = new_node;                // Update the head of dest
+
+    // Update the head of src
+    clslower *old_head = src->head;
+    src->head = src->head->next;          // Move head to the next node
+    free(old_head);                       // Free the old head node
+
+    return 0;  // Success
+}

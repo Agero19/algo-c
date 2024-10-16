@@ -17,42 +17,37 @@ int stop(void);
     goto label;                                                                \
   }
 
-#define NMEMB 12
+#define NMEMB 16
 
 int main() {
     fputs(
         "--- Tests on lslower module\n"
         "--- Type ctrl-d or enter 'q' or 'Q' to exit\n\n", stdout);
-    srand(0);
 
-    lslower *s = lslower_empty();  // Create a new list
-    ON_ERROR_GOTO(s == NULL, "Heap overflow", dispose);  // Check for allocation failure
+    srand(0);  // Seed random number generator for consistent results
 
     do {
+        lslower *s = lslower_empty();
+        ON_ERROR_GOTO(s == NULL, "Heap overflow", dispose);
+
         for (int k = 0; k < NMEMB; ++k) {
             slower x;
             slower_rand(&x);  // Generate random slower value
-            
-            // Insert the value at the head of the list
+
             ON_ERROR_GOTO(lslower_insert_head(s, &x) != 0, "Heap overflow", dispose);
         }
 
-        // Print the list in reverse order (since we are inserting at the head)
+        // Output the entire list
         lslower_fput(s, stdout);
+        fputc('\n', stdout);
 
-        // Test fetching the head value
-        {
-            slower x;
-            ON_ERROR_GOTO(lslower_head_value(s, &x) != 0, "Internal error", dispose);
-            slower_fput(&x, stdout);  // Print the head value
-            fputc('\n', stdout);
-        }
-
+    dispose:
+        lslower_dispose(&s);  // Free the list and its resources
     } while (!stop());
 
-dispose:
-    lslower_dispose(&s);  // Free the list and avoid memory leaks
+    return 0;
 }
+
 
 
 

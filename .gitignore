@@ -1,0 +1,13 @@
+.DS_Store
+
+.vscode/
+
+algo2_tp.pdf
+
+linked-lists/4/slower/*.o
+
+linked-lists/4/slower/*
+
+linked-lists/4/lslower/*.o
+
+linked-lists/4/lslower/*
