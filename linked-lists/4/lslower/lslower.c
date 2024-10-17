@@ -1,15 +1,15 @@
 #include "lslower.h"
 
-typedef struct clslower clslower;
+// typedef struct clslower clslower;
 
-struct clslower {
-  slower value;
-  clslower *next;
-};
+// struct clslower {
+//   slower value;
+//   clslower *next;
+// };
 
-struct lslower {
-  clslower *head;
-};
+// struct lslower {
+//   clslower *head;
+// };
 
 lslower *lslower_empty(void) {
   lslower *s = malloc(sizeof *s);

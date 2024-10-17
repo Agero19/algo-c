@@ -14,6 +14,19 @@
 //    sur le type « slower ».
 typedef struct lslower lslower;
 
+// Structure for each node in the list
+typedef struct clslower clslower;
+
+struct clslower {
+    slower value;   // The slower value stored in the node
+    clslower *next; // Pointer to the next node in the list
+};
+
+// Structure for the linked list controller
+typedef struct lslower {
+    clslower *head; // Pointer to the head of the list
+} lslower;
+
 //  lslower_empty : tente d'allouer les ressources nécessaires pour gérer une
 //    nouvelle liste initialement vide. Renvoie un pointeur nul en cas de
 //    dépassement de capacité. Renvoie sinon un pointeur vers le contrôleur

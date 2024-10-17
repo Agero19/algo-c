@@ -20,33 +20,50 @@ int stop(void);
 #define NMEMB 16
 
 int main() {
-    fputs(
-        "--- Tests on lslower module\n"
-        "--- Type ctrl-d or enter 'q' or 'Q' to exit\n\n", stdout);
+    // Define macro SLOWER_COMPAR_LENGTH before including headers
+    
 
-    srand(0);  // Seed random number generator for consistent results
+    // Other includes and definitions...
 
-    do {
-        lslower *s = lslower_empty();
-        ON_ERROR_GOTO(s == NULL, "Heap overflow", dispose);
+    // Create lists
+    lslower *s = lslower_empty();
+    lslower *slth = lslower_empty();
+    lslower *seq = lslower_empty();
+    lslower *sgth = lslower_empty();
+    ON_ERROR_GOTO(s == NULL || slth == NULL || seq == NULL || sgth == NULL, "Heap overflow", dispose);
 
-        for (int k = 0; k < NMEMB; ++k) {
-            slower x;
-            slower_rand(&x);  // Generate random slower value
+    // Insert elements into s
+    for (int k = 0; k < NMEMB; ++k) {
+        slower x;
+        slower_rand(&x);  // Generate random slower value
+        ON_ERROR_GOTO(lslower_insert_head(s, &x) != 0, "Heap overflow", dispose);
+    }
 
-            ON_ERROR_GOTO(lslower_insert_head(s, &x) != 0, "Heap overflow", dispose);
-        }
+    // Partition the list
+    lslower_partition_pivot(s, slth, seq, sgth);
 
-        // Output the entire list
-        lslower_fput(s, stdout);
-        fputc('\n', stdout);
+    // Output all lists
+    fputs("List slth (less than pivot):\n", stdout);
+    lslower_fput(slth, stdout);
+    fputc('\n', stdout);
 
-    dispose:
-        lslower_dispose(&s);  // Free the list and its resources
-    } while (!stop());
+    fputs("List seq (equal to pivot):\n", stdout);
+    lslower_fput(seq, stdout);
+    fputc('\n', stdout);
+
+    fputs("List sgth (greater than pivot):\n", stdout);
+    lslower_fput(sgth, stdout);
+    fputc('\n', stdout);
+
+dispose:
+    lslower_dispose(&s);
+    lslower_dispose(&slth);
+    lslower_dispose(&seq);
+    lslower_dispose(&sgth);
 
     return 0;
 }
+
 
 
 
