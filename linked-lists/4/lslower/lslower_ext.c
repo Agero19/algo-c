@@ -3,47 +3,37 @@
 
 int lslower_move_all_head(lslower *src, lslower *dest) {
     if (src == dest) {
-        return 1;  // Error: src and dest cannot be the same
+        return 1;  // Error: src and dest are not same
     }
-
     if (lslower_is_empty(src)) {
-        return 0;  // Source is empty, nothing to move
+        return 0;  
     }
-
-    // Find the tail of the src list
-    clslower *src_tail = src->head;  // Correct type: clslower *
-    while (src_tail->next != NULL) {
+    // Find tail of list
+    clslower *src_tail = src->head; 
+    while (src_tail->next != nullptr) {
         src_tail = src_tail->next;
     }
-
-    // Attach src list to the head of dest list
-    src_tail->next = dest->head;  // dest->head is also of type clslower *
-    dest->head = src->head;       // Move entire list from src to dest
-
-    // Clear the src list
-    src->head = NULL;
-
-    return 0;  // Success
+    // Attach src to head of dest
+    src_tail->next = dest->head; 
+    dest->head = src->head;  // Move entire list from src to dest
+    src->head = nullptr;
+    return 0;
 }
 
 void lslower_partition_pivot(lslower *s, lslower *slth, lslower *seq, lslower *sgth) {
     if (lslower_is_empty(s)) {
-        return;  // Nothing to partition if the list is empty
+        return;  // Nothing partition if empty
     }
+    // Get pivot from head of s
+    slower pivot = s->head->value;
 
-    // Get the pivot value from the head of the original list
-    slower pivot = s->head->value;  // Directly access the pivot value
-
-    // Iterate through the list s, partitioning the elements into slth, seq, and sgth
     clslower *current = s->head;
     clslower *next_node;
-
-    while (current != NULL) {
-        next_node = current->next;  // Save the next node
-
-        // Compare current value with pivot
+    // Loop over s partitioning to slth, seq, sgth
+    while (current != nullptr) {
+        next_node = current->next;  // Save next
+        // Compare current to pivot
         int cmp = slower_compar(&current->value, &pivot);
-
         if (cmp < 0) {
             // Move to slth (less than pivot)
             current->next = slth->head;
@@ -57,10 +47,8 @@ void lslower_partition_pivot(lslower *s, lslower *slth, lslower *seq, lslower *s
             current->next = sgth->head;
             sgth->head = current;
         }
-
         current = next_node;  // Move to the next node
     }
-
-    // Clear the original list s
-    s->head = NULL;
+    // Clear original s
+    s->head = nullptr;
 }

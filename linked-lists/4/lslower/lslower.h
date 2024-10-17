@@ -14,17 +14,16 @@
 //    sur le type « slower ».
 typedef struct lslower lslower;
 
-// Structure for each node in the list
 typedef struct clslower clslower;
 
 struct clslower {
-    slower value;   // The slower value stored in the node
-    clslower *next; // Pointer to the next node in the list
+    slower value;   
+    clslower *next; 
 };
 
 // Structure for the linked list controller
 typedef struct lslower {
-    clslower *head; // Pointer to the head of the list
+    clslower *head; 
 } lslower;
 
 //  lslower_empty : tente d'allouer les ressources nécessaires pour gérer une

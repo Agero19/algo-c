@@ -20,29 +20,27 @@ int stop(void);
 #define NMEMB 16
 
 int main() {
-    // Define macro SLOWER_COMPAR_LENGTH before including headers
-    
-
-    // Other includes and definitions...
-
     // Create lists
     lslower *s = lslower_empty();
     lslower *slth = lslower_empty();
     lslower *seq = lslower_empty();
     lslower *sgth = lslower_empty();
-    ON_ERROR_GOTO(s == NULL || slth == NULL || seq == NULL || sgth == NULL, "Heap overflow", dispose);
-
+    ON_ERROR_GOTO(
+      s == nullptr 
+      || slth == nullptr 
+      || seq == nullptr 
+      || sgth == nullptr, 
+      "Heap overflow", dispose
+    );
     // Insert elements into s
     for (int k = 0; k < NMEMB; ++k) {
         slower x;
-        slower_rand(&x);  // Generate random slower value
+        slower_rand(&x);  // Generate rand slower
         ON_ERROR_GOTO(lslower_insert_head(s, &x) != 0, "Heap overflow", dispose);
     }
-
-    // Partition the list
+    // Partition list
     lslower_partition_pivot(s, slth, seq, sgth);
-
-    // Output all lists
+    // Output lists
     fputs("List slth (less than pivot):\n", stdout);
     lslower_fput(slth, stdout);
     fputc('\n', stdout);
@@ -60,13 +58,8 @@ dispose:
     lslower_dispose(&slth);
     lslower_dispose(&seq);
     lslower_dispose(&sgth);
-
     return 0;
 }
-
-
-
-
 
 #define PROMPT "> "
 
