@@ -115,3 +115,28 @@ int lslower_tail_value(const lslower *s, slower *ptr) {
     *ptr = s->tail->value;
     return 0;  // Success
 }
+
+
+
+int lslower_move_all_head(lslower *src, lslower *dest) {
+    if (src == dest) {
+        return 1;  // Error: src and dest must not be the same
+    }
+
+    if (lslower_is_empty(src)) {
+        return 0;  // No elements to move
+    }
+
+    // Attach src's list to the head of dest
+    clslower *src_tail = src->head;
+    while (src_tail->next != NULL) {  // NULL is used in C
+        src_tail = src_tail->next;
+    }
+    
+    // Move the entire list from src to the head of dest
+    src_tail->next = dest->head;  // Connect the tail of src to the head of dest
+    dest->head = src->head;  // Move the head of src to the head of dest
+    src->head = NULL;  // src is now empty
+
+    return 0;  // Success
+}
