@@ -110,8 +110,8 @@ void *set_add(set *s, const void *ref) {
 void *set_remove(set *s, const void *ref) {
     if (s == nullptr || ref == nullptr) return nullptr;
 
-    struct cell *current = s->head;
-    struct cell *previous = nullptr;
+    cell *current = s->head;
+    cell *previous = nullptr;
 
     while (current != nullptr) {
         if (s->compar(current->data, ref) == 0) {
@@ -136,8 +136,22 @@ void *set_remove(set *s, const void *ref) {
 
 #if defined SET_EXT && defined WANT_SET_EXT
 
-/*
- *  IMPLANTATION DE L'EXTENSION OPTIONNELLE
- */
+void *set_min(set *s) {
+    if (s == nullptr || s->head == nullptr) {
+        return nullptr; 
+    }
+
+    struct cell *c = s->head;
+    void *min = c->data;
+
+    while (c != nullptr) {
+        if (s->compar(c->data, min) < 0) {
+            min = c->data;
+        }
+        c = c->next;
+    }
+
+    return min;
+}
 
 #endif

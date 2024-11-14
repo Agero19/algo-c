@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -std=c2x \
   -Wall -Wconversion -Werror -Wextra -Wpedantic -Wwrite-strings \
-  -O2
+  -O2 -DWANT_SET_EXT
 objects = main.o set.o
 executable = main
 makefile_indicator = .\#makefile\#

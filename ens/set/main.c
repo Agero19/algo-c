@@ -48,7 +48,7 @@ int main() {
   fprintf(stderr,
       "--- Info: Number of different words read: %zu\n", set_card(s));
   while (!set_is_empty(s)) {
-    char *t = set_pick(s);
+    char *t = set_min(s);
     printf("%s\n", t);
     set_remove(s, t);
   }
