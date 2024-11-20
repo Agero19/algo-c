@@ -14,7 +14,7 @@
  */
 
 typedef struct cell{
-    void *data;
+    const void *data;
     struct cell *next;
 } cell;
 
@@ -120,7 +120,7 @@ void *set_remove(set *s, const void *ref) {
             } else {
                 s->head = current->next;
             }
-            void *removed_data = current->data;
+            const void *removed_data = current->data;
             free(current);
             s->size--;
             return removed_data;
@@ -142,7 +142,7 @@ void *set_min(set *s) {
     }
 
     struct cell *c = s->head;
-    void *min = c->data;
+    const void *min = c->data;
 
     while (c != nullptr) {
         if (s->compar(c->data, min) < 0) {
