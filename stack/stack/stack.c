@@ -11,6 +11,8 @@
 //    la pile lorsqu'elle n'est pas vide, et le composant height a donc pour
 //    valeur la hauteur de la pile.
 
+#define nullptr 0
+
 typedef struct cstack cstack;
 
 struct cstack {
