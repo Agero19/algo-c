@@ -68,59 +68,93 @@ int main() {
     return r;
 
 #else
-  char ucharAddr[UCHAR_MAX + 1];  
-  int r = EXIT_SUCCESS;
-  long int n = 0;
-  int c;
+    char ucharAddr[UCHAR_MAX + 1];
+    int r = EXIT_SUCCESS;
+    long int n = 0;
+    int c;
 
-  stack *char_stack = stack_empty(); // Creer le stack vide 
-  if (char_stack == NULL) {
-    fprintf(stderr, "Failed to allocate memory for the stack.\n");
-    return EXIT_FAILURE;
-  }
-
-  int is_new_line = 1; 
-
-  while ((c = getchar()) != EOF) {
-        // Si flag vaut 1 on print numero 
-    if (is_new_line) {
-
-      ++n;
-      printf("%ld\t", n);
-      is_new_line = 0;
+    stack *char_stack = stack_empty();
+    if (char_stack == NULL) {
+        fprintf(stderr, "Failed to allocate memory for the stack.\n");
+        return EXIT_FAILURE;
     }
 
-    if (c == '\n') {
-      // Si on rencontre \n commencer a depiler le stack en reverse
-      while (!stack_is_empty(char_stack)) {
-          const void *encoded_char = stack_pop(char_stack);
-          putchar((int)((char *)encoded_char - ucharAddr));
-      }
+    int is_new_line = 1; 
 
-      putchar('\n'); 
-      is_new_line = 1; 
-
-    } else {
-            // Sinon ajouter le character en haut de stack
-      if (stack_push(char_stack, (c + ucharAddr)) == NULL) {
-        fprintf(stderr, "Failed to push character onto the stack.\n");
-        r = EXIT_FAILURE;
-        break;
-      }
-    }
-}
-
-    if (!stack_is_empty(char_stack)) {
-
-        while (!stack_is_empty(char_stack)) {
-            const void *encoded_char = stack_pop(char_stack);
-            putchar((int)((char *)encoded_char - ucharAddr));
+    while ((c = getchar()) != EOF) {
+        if (is_new_line) {
+            
+            ++n;
+            printf("%ld\t", n);
+            is_new_line = 0;
         }
 
-        putchar('\n'); 
+        if (c == '\n') {
+            
+            stack *temp_stack = stack_empty();
+            if (temp_stack == NULL) {
+                fprintf(stderr, "Failed to allocate memory for the temp stack.\n");
+                r = EXIT_FAILURE;
+                break;
+            }
+
+            while (!stack_is_empty(char_stack)) {
+                const void *encoded_char = stack_pop(char_stack);
+                stack_push(temp_stack, encoded_char);
+            }
+
+            while (!stack_is_empty(temp_stack)) {
+                const void *encoded_char = stack_pop(temp_stack);
+                putchar((int)((char *)encoded_char - ucharAddr));
+            }
+
+            stack_dispose(&temp_stack);
+            putchar('\n');
+            is_new_line = 1;
+        } else if (c == '#') {
+            
+            if (!stack_is_empty(char_stack)) {
+                stack_pop(char_stack);
+            }
+        } else if (c == '@') {
+            
+            while (!stack_is_empty(char_stack)) {
+                stack_pop(char_stack);
+            }
+        } else {
+            
+            if (stack_push(char_stack, (c + ucharAddr)) == NULL) {
+                fprintf(stderr, "Failed to push character onto the stack.\n");
+                r = EXIT_FAILURE;
+                break;
+            }
+        }
     }
 
-    stack_dispose(&char_stack); 
+    
+    if (!stack_is_empty(char_stack)) {
+        stack *temp_stack = stack_empty();
+        if (temp_stack == NULL) {
+            fprintf(stderr, "Failed to allocate memory for the temp stack.\n");
+            r = EXIT_FAILURE;
+        } else {
+            while (!stack_is_empty(char_stack)) {
+                const void *encoded_char = stack_pop(char_stack);
+                stack_push(temp_stack, encoded_char);
+            }
+
+            while (!stack_is_empty(temp_stack)) {
+                const void *encoded_char = stack_pop(temp_stack);
+                putchar((int)((char *)encoded_char - ucharAddr));
+            }
+
+            stack_dispose(&temp_stack);
+            putchar('\n');
+        }
+    }
+
+    
+    stack_dispose(&char_stack);
 
     if (!feof(stdin)) {
         r = EXIT_FAILURE;

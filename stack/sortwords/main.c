@@ -23,49 +23,101 @@
 
 int main() {
   int r = EXIT_SUCCESS;
-  stack *s = stack_empty();
-  if (s == nullptr) {
-    goto error_capacity;
-  }
-  char w[WORD_LENGTH_MAX + 1];
-  while (scanf("%" XSTR(WORD_LENGTH_MAX) "s", w) == 1) {
-    if (strlen(w) == WORD_LENGTH_MAX) {
-      fprintf(stderr, "*** Warning: Word '%s...' possibly sliced\n", w);
+    stack *s = stack_empty(); 
+    if (s == NULL) {
+        goto error_capacity;
     }
-    char *t = malloc(strlen(w) + 1);
-    if (t == nullptr) {
-      goto error_capacity;
+
+    char w[WORD_LENGTH_MAX + 1];
+    while (scanf("%" XSTR(WORD_LENGTH_MAX) "s", w) == 1) {
+        if (strlen(w) == WORD_LENGTH_MAX) {
+            fprintf(stderr, "*** Warning: Word '%s...' possibly sliced\n", w);
+        }
+
+        char *t = malloc(strlen(w) + 1);
+        if (t == NULL) {
+            goto error_capacity;
+        }
+        strcpy(t, w);
+
+        
+        stack *temp_stack = stack_empty(); 
+        if (temp_stack == NULL) {
+            free(t);
+            goto error_capacity;
+        }
+
+        
+        while (!stack_is_empty(s)) {
+            char *top = stack_pop(s);
+            if (strcmp(t, top) <= 0) {
+                
+                if (stack_push(s, top) == NULL) {
+                    free(top);
+                    stack_dispose(&temp_stack);
+                    goto error_capacity;
+                }
+                break;
+            }
+            
+            if (stack_push(temp_stack, top) == NULL) {
+                free(top);
+                stack_dispose(&temp_stack);
+                goto error_capacity;
+            }
+        }
+
+        
+        if (stack_push(s, t) == NULL) {
+            free(t);
+            stack_dispose(&temp_stack);
+            goto error_capacity;
+        }
+
+        
+        while (!stack_is_empty(temp_stack)) {
+            char *temp_top = stack_pop(temp_stack);
+            if (stack_push(s, temp_top) == NULL) {
+                free(temp_top);
+                stack_dispose(&temp_stack);
+                goto error_capacity;
+            }
+        }
+
+        stack_dispose(&temp_stack);
     }
-    strcpy(t, w);
-    if (stack_push(s, t) == nullptr) {
-      free(t);
-      goto error_capacity;
+
+    if (!feof(stdin)) {
+        goto error_read;
     }
-  }
-  if (!feof(stdin)) {
-    goto error_read;
-  }
-  while (!stack_is_empty(s)) {
-    char *t = stack_pop(s);
-    printf("%s\n", t);
-    free(t);
-  }
-  goto dispose;
-error_capacity:
-  fprintf(stderr, "*** Error: Not enough memory\n");
-  goto error;
-error_read:
-  fprintf(stderr, "*** Error: A read error occurs\n");
-  goto error;
-error:
-  r = EXIT_FAILURE;
-  goto dispose;
-dispose:
-  if (s != nullptr) {
+
+    printf("\nSorted list of words: \n");
     while (!stack_is_empty(s)) {
-      free(stack_pop(s));
+        char *t = stack_pop(s);
+        printf("%s\n", t);
+        free(t);
     }
-  }
-  stack_dispose(&s);
-  return r;
+    goto dispose;
+
+error_capacity:
+    fprintf(stderr, "*** Error: Not enough memory\n");
+    goto error;
+
+error_read:
+    fprintf(stderr, "*** Error: A read error occurs\n");
+    goto error;
+
+error:
+    r = EXIT_FAILURE;
+    goto dispose;
+
+dispose:
+    if (s != NULL) {
+        while (!stack_is_empty(s)) {
+            free(stack_pop(s));
+        }
+    }
+    stack_dispose(&s);
+    return r;
+
 }

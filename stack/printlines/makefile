@@ -2,7 +2,7 @@ stack_dir = ../stack/
 CC = gcc
 CFLAGS = -std=c2x \
   -Wall -Wconversion -Werror -Wextra -Wpedantic -Wwrite-strings \
-  -O2 \
+  -O2 -DWANT_STACK_EXT \
   -I$(stack_dir)
 vpath %.c $(stack_dir)
 vpath %.h $(stack_dir)

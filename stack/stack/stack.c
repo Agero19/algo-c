@@ -93,8 +93,53 @@ size_t stack_height(stack *s) {
 
 #if defined STACK_EXT && defined WANT_STACK_EXT
 
-/*
- *  IMPLANTATION DE L'EXTENSION OPTIONNELLE
- */
+stack *stack_clean(stack *s) {
+    if (s == nullptr) return nullptr;
+
+    while (!stack_is_empty(s)) {
+        free(stack_pop(s));
+    }
+
+    return s;
+}
+
+
+stack *stack_reverse(stack *s) {
+    if (s == nullptr || stack_is_empty(s)) return s;
+
+    stack *temp_stack = stack_empty();
+    if (temp_stack == nullptr) return nullptr;
+
+    
+    while (!stack_is_empty(s)) {
+        if (stack_push(temp_stack, stack_pop(s)) == nullptr) {
+            stack_dispose(&temp_stack);
+            return nullptr;
+        }
+    }
+
+    
+    while (!stack_is_empty(temp_stack)) {
+        if (stack_push(s, stack_pop(temp_stack)) == nullptr) {
+            stack_dispose(&temp_stack);
+            return nullptr;
+        }
+    }
+
+    stack_dispose(&temp_stack);
+    return s;
+}
+
+
+void *stack_bottom(stack *s) {
+    if (s == nullptr || stack_is_empty(s)) return nullptr;
+
+    cstack *current = s->head;
+    while (current->next != nullptr) {
+        current = current->next;
+    }
+
+    return (void *)current->ref;
+}
 
 #endif
