@@ -1,6 +1,6 @@
 //  Affiche sur la sortie standard la liste des différents mots lus sur
 //    l'entrée standard, chaque mot étant précédé de son nombre d'occurrences.
-//  Limites :
+//  Limitations :
 //  - les mots sont obtenus par lecture sur l'entrée des suites consécutives
 //    de longueur maximale mais majorée WORD_LENGTH_MAX de caractères qui ne
 //    sont pas de la catégorie isspace ;
@@ -16,8 +16,9 @@
 #include <string.h>
 #include "hashtable.h"
 #include "holdall.h"
-
 #define nullptr NULL
+
+#define COUNTER_MAX 7
 
 //  str_hashfun : l'une des fonctions de pré-hachage conseillées par Kernighan
 //    et Pike pour les chaines de caractères.
@@ -26,7 +27,7 @@ static size_t str_hashfun(const char *s);
 //  scptr_display : affiche sur la sortie standard *cptr, le caractère
 //    tabulation, la chaine de caractères pointée par s et la fin de ligne.
 //    Renvoie zéro en cas de succès, une valeur non nulle en cas d'échec.
-static int scptr_display(const char *s, const char *cptr);
+static int scptr_display(char *counter_array, const char *s, const char *cptr);
 
 //  rfree : libère la zone mémoire pointée par ptr et renvoie zéro.
 static int rfree(void *ptr);
@@ -35,15 +36,13 @@ static int rfree(void *ptr);
 #define XSTR(s) STR(s)
 
 #define WORD_LENGTH_MAX 31
-#define COUNTER_LENGTH_MAX 3
 
-static char counter_array[COUNTER_LENGTH_MAX + 1];
-
-int main() {
+int main(void) {
   int r = EXIT_SUCCESS;
-  hashtable *ht = hashtable_empty((int (*)(const void *, const void *)) strcmp,
-        (size_t (*)(const void *)) str_hashfun, 1.0);
+  hashtable *ht = hashtable_empty((int (*)(const void *, const void *))strcmp,
+      (size_t (*)(const void *))str_hashfun, 1.0);
   holdall *has = holdall_empty();
+  char counter_array[COUNTER_MAX + 1];
   if (ht == nullptr
       || has == nullptr) {
     goto error_capacity;
@@ -55,10 +54,11 @@ int main() {
     }
     char *cptr = hashtable_search(ht, w);
     if (cptr != nullptr) {
-      if (cptr - counter_array < COUNTER_LENGTH_MAX) {
-        if (hashtable_add(ht, w, cptr + 1) == nullptr) {
-          goto error_capacity;
-        }
+      if ((cptr - counter_array) > COUNTER_MAX) {
+        cptr = counter_array + COUNTER_MAX;
+      }
+      if (hashtable_add(ht, w, cptr + 1) == nullptr) {
+        goto error_capacity;
       }
     } else {
       char *s = malloc(strlen(w) + 1);
@@ -70,20 +70,7 @@ int main() {
         free(s);
         goto error_capacity;
       }
-      cptr = malloc(sizeof *cptr);
-      if (cptr == nullptr) {
-        goto error_capacity;
-      }
-
-      // if (holdall_put(cptr, cptr) != 0) {
-      //   free(cptr);
-      //   goto error_capacity;
-      // }
-
-      cptr = &counter_array[holdall_count(has) % COUNTER_LENGTH_MAX];
-      *cptr = 1;
-
-      if (hashtable_add(ht, s, cptr + 1) == nullptr) {
+      if (hashtable_add(ht, s, counter_array + 1) == nullptr) {
         goto error_capacity;
       }
     }
@@ -93,15 +80,15 @@ int main() {
   }
   fprintf(stderr, "--- Info: Number of distinct words: %zu\n",
       holdall_count(has));
-#if defined HOLDALL_EXT && defined WANT_HOLDALL_EXT
-  holdall_sort(has, (int (*)(const void *, const void *)) strcmp);
+#if defined HOLDALL_WANT_EXT && HOLDALL_WANT_EXT != 0
+  holdall_sort(has, (int (*)(const void *, const void *))strcmp);
 #endif
-  if (holdall_apply_context(has,
-        ht, (void *(*)(void *, void *)) hashtable_search,
-        (int (*)(void *, void *)) scptr_display) != 0) {
+  if (holdall_apply_context2(has,
+      ht, (void *(*)(void *, void *))hashtable_search,
+      counter_array, (int (*)(void *, void *, void *))scptr_display) != 0) {
     goto error_write;
   }
-#if defined HASHTABLE_EXT && defined WANT_HASHTABLE_EXT
+#if defined HASHTABLE_STATS && HASHTABLE_STATS != 0
   hashtable_fprint_stats(ht, stderr);
 #endif
   goto dispose;
@@ -134,9 +121,9 @@ size_t str_hashfun(const char *s) {
   return h;
 }
 
-int scptr_display(const char *s,const char *cptr) {
-  if (cptr - counter_array > COUNTER_LENGTH_MAX) {
-    fprintf(stderr, "*** Warning: string exeed maximum capacity\n");
+int scptr_display(char *counter_array, const char *s, const char *cptr) {
+  if ((cptr - counter_array) > COUNTER_MAX) {
+    fprintf(stderr, "*** Warning: Word '%s...' possibly sliced\n", s);
   }
   return printf("%td\t%s\n", (cptr - counter_array), s) < 0;
 }
@@ -145,3 +132,4 @@ int rfree(void *ptr) {
   free(ptr);
   return 0;
 }
+
