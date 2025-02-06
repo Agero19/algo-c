@@ -5,10 +5,8 @@
 
 #define nullptr NULL
 
-#define NOUEUD "O"
-#define ARBRE_VIDE "|"
-#define NOUEUD_L "a"
-#define VIDE_L "b"
+
+
 
 //=== Type cbt =================================================================
 
@@ -169,31 +167,36 @@ static void cbt__repr_formal(const cbt *p) {
 //  ICI, PROCHAINEMENT, LES SPÉCIFICATIONS ET DÉFINITIONS DE :
 //    static void cbt__repr_lukas(const cbt *p);
 //    static void cbt__repr_subtrees(const cbt *p);
+#define LUKA_N "a"
+#define LUKA_VIDE "b"
 
 static void cbt__repr_lukas(const cbt *p) {
   if (IS_EMPTY(p)) {
-    printf(VIDE_L);
+    printf(LUKA_VIDE);
     return;
   } else {
-    printf(NOUEUD_L);
+    printf(LUKA_N);
   }
   cbt__repr_lukas(LEFT(p));
   cbt__repr_lukas(RIGHT(p));
 }
+
+#define SUBTREE_NOUEUD "O"
+#define SUBTREE_VIDE "|"
 
 void cbt__repr_subtrees(const cbt *p) {
   if (IS_EMPTY(p)) {
     return;
   }
   if (IS_EMPTY(LEFT(p))) {
-    printf(ARBRE_VIDE);
+    printf(SUBTREE_VIDE);
   } else {
-    printf(NOUEUD);
+    printf(SUBTREE_NOUEUD);
   }
   if (IS_EMPTY(RIGHT(p))) {
-    printf(ARBRE_VIDE);
+    printf(SUBTREE_VIDE);
   } else {
-    printf(NOUEUD);
+    printf(SUBTREE_NOUEUD);
   }
   cbt__repr_subtrees(LEFT(p));
   cbt__repr_subtrees(RIGHT(p));
@@ -211,11 +214,11 @@ void cbt__repr_subtrees(const cbt *p) {
 
 static void cbt__repr_graphic(cbt *p, size_t level) {
   if (p == NULL) {
-    printf("%*s\n\n", (int) level * REPR_TAB, ARBRE_VIDE);
+    printf("%*s\n", (int) level * REPR_TAB + 1, SUBTREE_VIDE);
     return;
   }
   cbt__repr_graphic(RIGHT(p), level + 1);
-  printf("%*s\n\n", (int) level * REPR_TAB, NOUEUD);
+  printf("%*s\n", (int) level * REPR_TAB + 1, SUBTREE_NOUEUD);
   cbt__repr_graphic(LEFT(p), level + 1);
 }
 
