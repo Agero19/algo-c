@@ -3,6 +3,13 @@
 
 #include "bt.h"
 
+#define nullptr NULL
+
+#define NOUEUD "O"
+#define ARBRE_VIDE "|"
+#define NOUEUD_L "a"
+#define VIDE_L "b"
+
 //=== Type cbt =================================================================
 
 //--- Définition cbt -----------------------------------------------------------
@@ -76,6 +83,22 @@ static cbt *cbt__comb_left(size_t n) {
 //    static cbt *cbt__comb_right(size_t n);
 //    static cbt *cbt__random(size_t n);
 
+static cbt *cbt__comb_right(size_t n) {
+  return n == 0
+    ? EMPTY()
+    : cbt__root(EMPTY(), cbt__comb_right(n - 1));
+}
+
+static cbt *cbt__random(size_t n) {
+  if (n == 0) {
+    return EMPTY();
+  }
+  size_t k = (size_t) ((double) rand() / (RAND_MAX + 1.0) * (double) n);
+  cbt *left = cbt__random(k);
+  cbt *right = cbt__random(n - k - 1);
+  return cbt__root(left, right);
+}
+
 //  DEFUN_CBT__MEASURE : définit la fonction récursive de nom « cbt__ ## fun »
 //    et de paramètre un pointeur d'arbre binaire, qui renvoie zéro si l'arbre
 //    est vide et « 1 + oper(r0, r1) » sinon, où r0 et r1 sont les valeurs
@@ -100,6 +123,32 @@ DEFUN_CBT__MEASURE(distance, min__size_t)
 //    static bool cbt__is_comb_right(const cbt *p);
 //    static bool cbt__is_similar(const cbt *p1, const cbt *p2);
 
+static bool cbt__is_skinny(const cbt *p) {
+  return IS_EMPTY(p) ? true : (IS_EMPTY(LEFT(p)) && cbt__is_skinny(RIGHT(p)))
+    || (IS_EMPTY(RIGHT(p)) && cbt__is_skinny(LEFT(p)));
+}
+
+static bool cbt__is_comb_left(const cbt *p) {
+  return IS_EMPTY(p) ? true : (IS_EMPTY(RIGHT(p))
+    && cbt__is_comb_left(LEFT(p)));
+}
+
+static bool cbt__is_comb_right(const cbt *p) {
+  return IS_EMPTY(p) ? true : (IS_EMPTY(LEFT(p))
+    && cbt__is_comb_right(RIGHT(p)));
+}
+
+static bool cbt__is_similar(const cbt *p1, const cbt *p2) {
+  if (IS_EMPTY(p1)) {
+    return IS_EMPTY(p2);
+  }
+  if (IS_EMPTY(p2)) {
+    return false;
+  }
+  return cbt__is_similar(LEFT(p1), LEFT(p2))
+    && cbt__is_similar(RIGHT(p1), RIGHT(p2));
+}
+
 //  cbt__repr_formal : affiche la représentation formelle de l'arbre binaire
 //    pointé par p.
 
@@ -121,6 +170,35 @@ static void cbt__repr_formal(const cbt *p) {
 //    static void cbt__repr_lukas(const cbt *p);
 //    static void cbt__repr_subtrees(const cbt *p);
 
+static void cbt__repr_lukas(const cbt *p) {
+  if (IS_EMPTY(p)) {
+    printf(VIDE_L);
+    return;
+  } else {
+    printf(NOUEUD_L);
+  }
+  cbt__repr_lukas(LEFT(p));
+  cbt__repr_lukas(RIGHT(p));
+}
+
+void cbt__repr_subtrees(const cbt *p) {
+  if (IS_EMPTY(p)) {
+    return;
+  }
+  if (IS_EMPTY(LEFT(p))) {
+    printf(ARBRE_VIDE);
+  } else {
+    printf(NOUEUD);
+  }
+  if (IS_EMPTY(RIGHT(p))) {
+    printf(ARBRE_VIDE);
+  } else {
+    printf(NOUEUD);
+  }
+  cbt__repr_subtrees(LEFT(p));
+  cbt__repr_subtrees(RIGHT(p));
+}
+
 #define REPR_TAB 4
 
 //  cbt__repr_graphic : affiche la représentation graphique par rotation
@@ -130,6 +208,16 @@ static void cbt__repr_formal(const cbt *p) {
 
 //  ICI, PROCHAINEMENT, LA DÉFINITION DE :
 //    static void cbt__repr_graphic(const cbt *p, size_t level);
+
+static void cbt__repr_graphic(cbt *p, size_t level) {
+  if (p == NULL) {
+    printf("%*s\n\n", (int) level * REPR_TAB, ARBRE_VIDE);
+    return;
+  }
+  cbt__repr_graphic(RIGHT(p), level + 1);
+  printf("%*s\n\n", (int) level * REPR_TAB, NOUEUD);
+  cbt__repr_graphic(LEFT(p), level + 1);
+}
 
 //=== Type bt ==================================================================
 
@@ -159,6 +247,34 @@ bt *bt_comb_left(size_t n) {
 //    bt_comb_right
 //    bt_random
 
+bt *bt_comb_right(size_t n) {
+  bt *t = malloc(sizeof *t);
+  if (t == NULL) {
+    return NULL;
+  }
+  cbt *p = cbt__comb_right(n);
+  if (n != 0 && IS_EMPTY(p)) {
+    free(t);
+    return NULL;
+  }
+  t->root = p;
+  return t;
+}
+
+bt *bt_random(size_t n) {
+  bt *t = malloc(sizeof *t);
+  if (t == NULL) {
+    return NULL;
+  }
+  cbt *p = cbt__random(n);
+  if (n != 0 && IS_EMPTY(p)) {
+    free(t);
+    return NULL;
+  }
+  t->root = p;
+  return t;
+}
+
 void bt_dispose(bt **tptr) {
   if (*tptr == nullptr) {
     return;
@@ -186,6 +302,22 @@ size_t bt_distance(bt *t) {
 //    bt_is_comb_right
 //    bt_is_similar
 
+bool bt_is_skinny(bt *t) {
+  return cbt__is_skinny(t->root);
+}
+
+bool bt_is_comb_left(bt *t) {
+  return cbt__is_comb_left(t->root);
+}
+
+bool bt_is_comb_right(bt *t) {
+  return cbt__is_comb_right(t->root);
+}
+
+bool bt_is_similar(bt *t1, bt *t2) {
+  return cbt__is_similar(t1->root, t2->root);
+}
+
 void bt_repr_formal(bt *t) {
   cbt__repr_formal(t->root);
 }
@@ -194,3 +326,15 @@ void bt_repr_formal(bt *t) {
 //    bt_repr_lukas
 //    bt_repr_subtrees
 //    bt_repr_graphic
+
+void bt_repr_lukas(bt *t) {
+  cbt__repr_lukas(t->root);
+}
+
+void bt_repr_subtrees(bt *t) {
+  cbt__repr_subtrees(t->root);
+}
+
+void bt_repr_graphic(bt *t) {
+  cbt__repr_graphic(t->root, 0);
+}
