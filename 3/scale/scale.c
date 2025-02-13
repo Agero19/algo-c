@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "scale.h"
 
-#define nullptr NULL
+// #define nullptr NULL
 
 struct scale {
   uint16_t valmax;

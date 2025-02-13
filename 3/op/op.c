@@ -2,7 +2,7 @@
 #include <sys/ioctl.h>
 #include "op.h"
 
-#define nullptr NULL
+// #define nullptr NULL
 
 static const opitem *op__search(int c, const opitem *base, size_t nmemb) {
   const opitem *p = base;
