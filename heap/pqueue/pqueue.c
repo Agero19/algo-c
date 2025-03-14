@@ -25,90 +25,108 @@ size_t pqueue_length(pqueue *q) {
 }
 
 pqueue *pqueue_empty(int (*compar)(const void *, const void *)) {
-  const void **aref = malloc((sizeof *aref) * CAPACITY_MIN);
-  if (aref == NULL) {
-    return NULL;
+  pqueue *q = malloc(sizeof(pqueue));
+  if (q == nullptr) {
+    return nullptr;
   }
-  pqueue *p = malloc(sizeof *p);
-  if (p == NULL) {
-    return NULL;
+  q->aref = malloc(CAPACITY_MIN * sizeof(const void *));
+  if (q->aref == nullptr) {
+    free(q);
+    return nullptr;
   }
-  p->aref = aref;
-  p->capacity = CAPACITY_MIN;
-  p->length = 0;
-  p->compar = compar;
-  return p;
+  q->compar = compar;
+  q->capacity = CAPACITY_MIN;
+  q->length = 0;
+  return q;
 }
 
 void pqueue_dispose(pqueue **qptr) {
-  if (*qptr == NULL) {
+  if (qptr == nullptr || *qptr == nullptr) {
     return;
   }
-  free((*qptr)->aref);
-  free(*qptr);
-}
-
-void *pqueue_head(pqueue *q) {
-  if (q->length == 0) {
-    return NULL;
-  }
-  return (void *) q->aref[0];
+  pqueue *q = *qptr;
+  free(q->aref);
+  free(q);
+  *qptr = nullptr;
 }
 
 void *pqueue_enqueue(pqueue *q, const void *ref) {
-  if (ref == NULL) {
-    return NULL;
+  if (ref == nullptr) {
+    return nullptr;
   }
-  if (q->capacity == q->length) {
-    if ((sizeof *q->aref) * q->length > SIZE_MAX / CAPACITY_MUL) {
-      return NULL;
+
+  if (q->length == q->capacity) {
+    size_t new_capacity = q->capacity * CAPACITY_MUL;
+    
+    const void **new_aref = realloc(q->aref, new_capacity * sizeof(const void *));
+
+    if (new_aref == nullptr) {
+      return nullptr;
     }
-    const void **a = realloc(q->aref,
-        (sizeof *q->aref) * q->length * CAPACITY_MUL);
-    if (a == NULL) {
-      return NULL;
-    }
-    q->aref = a;
-    q->capacity *= CAPACITY_MUL;
+    q->aref = new_aref;
+    q->capacity = new_capacity;
   }
+
   q->aref[q->length] = ref;
-  ++q->length;
-  size_t k = q->length - 1;
-  while (k != 0 && q->compar(q->aref[k], q->aref[(k - 1) / 2]) < 0) {
-    const void *r = q->aref[k];
-    q->aref[k] = q->aref[(k - 1) / 2];
-    q->aref[(k - 1) / 2] = r;
-    k = (k - 1) / 2;
+  q->length++;
+  size_t current = q->length - 1;
+  
+  while (current > 0) {
+    size_t parent = (current - 1) / 2;
+    
+    if (q->compar(q->aref[current], q->aref[parent]) < 0) {
+      const void *temp = q->aref[current];
+      q->aref[current] = q->aref[parent];
+      q->aref[parent] = temp;
+      current = parent;
+    } else {
+      break;
+    }
   }
   return (void *) ref;
 }
 
 void *pqueue_dequeue(pqueue *q) {
-  if (q->length == 0) {
-    return NULL;
+  if (pqueue_is_empty(q)) {
+    return nullptr;
   }
-  const void *r = q->aref[0];
-  size_t k = 0;
-  while (2 * k + 1 < q->length) {
-    size_t min;
-    if (2 * k + 2 == q->length) {
-      min = 2 * k + 1;
-    } else {
-      min = q->compar(q->aref[2 * k + 1], q->aref[2 * k + 2]) < 0
-          ? 2 * k + 1 : 2 * k + 2;
+
+  const void *head = q->aref[0];
+  
+  if (q->length == 1) {
+    q->length = 0;
+  } else {
+    q->aref[0] = q->aref[q->length - 1];
+    q->length--;
+
+    size_t current = 0;
+    
+    while (1) {
+      size_t left = 2 * current + 1;
+      size_t right = 2 * current + 2;
+      size_t min_child = current;
+      
+      if (left < q->length && q->compar(q->aref[left], q->aref[min_child]) < 0) {
+        min_child = left;
+      }
+      if (right < q->length && q->compar(q->aref[right], q->aref[min_child]) < 0) {
+        min_child = right;
+      }
+      if (min_child == current) {
+        break;
+      }
+      const void *temp = q->aref[current];
+      q->aref[current] = q->aref[min_child];
+      q->aref[min_child] = temp;
+      current = min_child;
     }
-    if (q->compar(q->aref[k], q->aref[min]) < 0) {
-      q->aref[k] = q->aref[min];
-      k = min;
-    }
   }
-  q->aref[k] = q->aref[q->length - 1];
-  while (k != 0 && q->compar(q->aref[k], q->aref[(k - 1) / 2]) < 0) {
-    const void *r = q->aref[k];
-    q->aref[k] = q->aref[(k - 1) / 2];
-    q->aref[(k - 1) / 2] = r;
-    k = (k - 1) / 2;
+  return (void *) head;
+}
+
+void *pqueue_head(pqueue *q) {
+  if (pqueue_is_empty(q)) {
+    return nullptr;
   }
-  --q->length;
-  return (void *) r;
+  return (void *) q->aref[0];
 }
