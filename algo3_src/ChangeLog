@@ -1,0 +1,82 @@
+11-02-2026
+* modifications
+  - courstd/bric_a_brac/bfr_1st_grp.c
+    deux autres codages sont ajoutés dans lesquels la structure nodeleaf est
+    sans tableau flexible
+
+09-02-2026
+* modifications
+  - tp/2/bt/bt.c
+    la spécification de cbt__comb_left est fausse : il n'y a aucune assurance
+    que l'arbre vide soit renvoyé lorsqu'une erreur d'allocation survient. La
+    nouvelle spécification est :
+
+//  cbt__comb_left : tente d'implanter un peigne gauche de taille n. Si n n'est
+//    pas nul et qu'une erreur d'allocation survient, renvoie un pointeur vers
+//    l'implantation d'un arbre de taille strictement inférieure à n. Renvoie
+//    sinon un pointeur vers l'implantation du peigne.
+
+    L'implantation de la fonction bt_comb_left est impactée. Elles est
+    dorénavant proposée sous la forme :
+
+bt *bt_comb_left(size_t n) {
+  bt *t = malloc(sizeof *t);
+  if (t == nullptr) {
+    return nullptr;
+  }
+  cbt *p = cbt__comb_left(n);
+  if (n != 0 && cbt__size(p) < n) {
+    cbt__dispose(p);
+    free(t);
+    return nullptr;
+  }
+  t->root = p;
+  return t;
+}
+
+* ajout
+  - tp/2/bt/bt_erroneous.c
+    ancienne version de tp/2/bt/bt.c laissée à titre de comparaison
+
+06-02-2026
+* ajouts
+  - tp/3/*
+
+29-01-2026
+* ajouts
+  - tp/2/*
+
+25-01-2026
+* ajouts
+  - courstd/malloccp/*
+  - courstd/stack_malloccped/*
+  - courstd/stack_malloccped_test/*
+
+23-01-2026
+* ajouts
+  - tp/1/*
+
+19-01-2026
+* modifications
+  - courstd/table/table.c
+    ajout de la spécification sur TABLE_ADD_TAIL
+* ajouts
+  - courstd/hashtable/*
+  - courstd/hashtable_test/*
+
+18-01-2026
+* création du dépôt algo3_src.tar.gz
+* ajouts
+  - courstd/bric_a_brac/*
+  - courstd/bunch/*
+  - courstd/holdall/*
+  - courstd/holdall_bunched/*
+  - courstd/holdall_test/*
+  - courstd/stack/*
+  - courstd/stack_bunched/*
+  - courstd/stack_holdall_bunched_test/*
+  - courstd/stack_holdall_test/*
+  - courstd/stack_test/*
+  - courstd/table/*
+  - courstd/table_test/*
+  - ChangeLog
